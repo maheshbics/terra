@@ -1,8 +1,8 @@
-def bucket = 'oraculi-terraform-states7'
-def functionName = 'serverless'
-def region = 'ap-south-1'
-def environments = ['devlop': 'sandbox', 'prepod': 'staging', 'master': 'production']
-def s3Uri = 's3://${bucket}/${functionName}/${environments[env.BRANCH_NAME]}/'
+// def bucket = 'oraculi-terraform-states7'
+// def functionName = 'serverless'
+// def region = 'ap-south-1'
+// def environments = ['devlop': 'sandbox', 'prepod': 'staging', 'master': 'production']
+// def s3Uri = 's3://${bucket}/${functionName}/${environments[env.BRANCH_NAME]}/'
 
 
 node('workers'){
@@ -46,5 +46,5 @@ node('workers'){
     //             aws lambda update-alias --function-name ${functionName} --name ${environments[env.BRANCH_NAME]} --function-version \$publishedVersion --region ${region}
     //         """
     //     }
-    }
+    // }
 }
