@@ -16,11 +16,11 @@ node('workers'){
 
     stage('Build'){
         sh """
-            docker build -f Dockerfile.build -t serverless-app .
-            containerName=\$(docker run -d serverless-app)
-            docker cp \$containerName:/go/src/github.com/maheshbics/react-serverless/main main
+            docker build -f Dockerfile.build -t react-app .
+            containerName=\$(docker run -d react-app)
+            docker cp \$containerName:/app/build build
             docker rm -f \$containerName
-            zip -r deployment.zip main
+            zip -r deployment.zip build
         """ 
     }
 
