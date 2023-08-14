@@ -18,7 +18,7 @@ node('workers'){
         sh """
             docker build -f Dockerfile.build -t serverless-app .
             containerName=\$(docker run -d serverless-app)
-            docker cp \$containerName:/go/src/github.com/maheshbics/lambda-serverless/main main
+            docker cp \$containerName:/go/src/github.com/maheshbics/react-serverless/main main
             docker rm -f \$containerName
             zip -r deployment.zip main
         """ 
