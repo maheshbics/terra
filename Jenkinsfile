@@ -29,7 +29,7 @@ pipeline {
 
     stage('Push to ECR') {
         sh """
-            $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
+            aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION}
             docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
             docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
         """     
