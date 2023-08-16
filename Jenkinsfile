@@ -1,6 +1,4 @@
-pipeline {
-    
-    environment {
+environment {
         // Set your AWS credentials environment variables
         AWS_DEFAULT_REGION    = 'ap-south-1'  // Change to your desired region
         ECR_REPO_NAME         = 'serverless' // Change to your ECR repository name
@@ -8,7 +6,7 @@ pipeline {
         DOCKERFILE_PATH       = 'D:/jenkins-cluster-on-aws/react-app/react/Dockerfile.build' // Path to your Dockerfile
     }
 
-    node('workers'){
+node('workers'){
     stage('Checkout'){
         checkout scm
     }
@@ -68,6 +66,4 @@ pipeline {
     //         """
     //     }
     // }
-    }
-
 }
