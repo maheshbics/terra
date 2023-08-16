@@ -1,10 +1,8 @@
-environment {
-        // Set your AWS credentials environment variables
-        AWS_DEFAULT_REGION    = 'ap-south-1'  // Change to your desired region
-        ECR_REPO_NAME         = 'serverless' // Change to your ECR repository name
-        DOCKER_IMAGE_NAME     = 'buildfile' // Change to your desired image name
-        DOCKERFILE_PATH       = 'D:/jenkins-cluster-on-aws/react-app/react/Dockerfile.build' // Path to your Dockerfile
-    }
+def region = 'ap-south-1'
+def dockerimagename = 'buildfile'
+def awsaccountid ='880315142031'
+def ecrreponame = 'terra-react'
+
 
 node('workers'){
     stage('Checkout'){
@@ -27,9 +25,9 @@ node('workers'){
 
     stage('Push to ECR') {
         sh """
-            aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION}
-            docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
-            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
+            aws ecr get-login --no-include-email --region ${region}
+            docker tag ${dockerimagename}:${env.BUILD_NUMBER} ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
+            docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
         """     
     }
     
