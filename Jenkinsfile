@@ -2,7 +2,11 @@ def region = 'ap-south-1'
 def dockerimagename = 'buildfile'
 def awsaccountid ='880315142031'
 def ecrreponame = 'terra-react'
-
+def ec2InstanceIp = '43.205.115.227'
+def ec2sshKey = 'C:/Users/YOGA/Downloads/terra.pem'
+def ecrRegion = 'ap-south-1'
+def ecrRepoUri = '880315142031.dkr.ecr.ap-south-1.amazonaws.com/terra-react:latest'
+def contname = 'C7'
 
 node('workers'){
     stage('Checkout'){
@@ -30,6 +34,13 @@ node('workers'){
             docker tag ${dockerimagename} ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
             docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
         """     
+    }
+
+    stage('deploy on EC2') {
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
     }
     
     // post {
