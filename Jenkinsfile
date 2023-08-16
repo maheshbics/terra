@@ -2,8 +2,6 @@ pipeline {
     
     environment {
         // Set your AWS credentials environment variables
-        AWS_ACCESS_KEY_ID     = credentials('AKIA4Z5W7B6HQNT34PS5')
-        AWS_SECRET_ACCESS_KEY = credentials('svNJ5v+ul61KCIM8P//ek3WIiYJEs0MgeNDGQAj2')
         AWS_DEFAULT_REGION    = 'ap-south-1'  // Change to your desired region
         ECR_REPO_NAME         = 'serverless' // Change to your ECR repository name
         DOCKER_IMAGE_NAME     = 'buildfile' // Change to your desired image name
@@ -29,28 +27,22 @@ pipeline {
         """ 
     }
 
-     stage('Push to ECR') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh """
-                            $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
-                            docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
-                            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
-                        """
-                    }
-                }
-            }
-        }
-    
-    post {
-        always {
-            script {
-                // Clean up Docker images if needed
-                sh "docker rmi ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
-            }
-        }
+    stage('Push to ECR') {
+        sh """
+            $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
+            docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
+            docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BUILD_NUMBER}
+        """     
     }
+    
+    // post {
+    //     always {
+    //         script {
+    //             // Clean up Docker images if needed
+    //             sh "docker rmi ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+    //         }
+    //     }
+    // }
 
 
     // stage('Push to s3'){
