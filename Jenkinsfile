@@ -26,7 +26,7 @@ node('workers'){
     stage('Push to ECR') {
         sh """
             aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com 
-            aws ecr describe-repositories --repository-names ${ecrreponame} || aws ecr create-repository --repository-name ${ecrreponame}
+            aws ecr describe-repositories --repository-names ${ecrreponame} --region ${region} || aws ecr create-repository --repository-name ${ecrreponame} --region ${region}
             docker tag ${dockerimagename}:${env.BUILD_NUMBER} ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
             docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
         """     
