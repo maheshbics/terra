@@ -37,28 +37,11 @@ node('workers'){
     }
 
     stage('deploy on EC2') {
-        def sshKey = credentials('3.110.162.54')
-
-         sshagent(credentials: [sshKey]) {
-                def remote = [:]
-                remote.name = 'terra-instance'
-                remote.host = '3.110.162.54'
-                remote.user = 'ec2-user'
-                remote.allowAnyHosts = true
-                
-                // Enable verbose logging
-                remote.debug(true)
-
-                remote.sshCommand "docker stop ${contname} || true"
-                remote.sshCommand "docker rm ${contname} || true"
-                remote.sshCommand "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com"
-                remote.sshCommand "docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}"
-                remote.sshCommand "docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
-            }
+      
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
+        sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
     }
     
     // post {
