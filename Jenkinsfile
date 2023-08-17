@@ -15,17 +15,30 @@ def secretKey = 'svNJ5v+ul61KCIM8P//ek3WIiYJEs0MgeNDGQAj2'
 
 pipeline {
     agent none
-
-node('workers'){
-    stage('Checkout'){
+    stages{
+        stage('Checkout'){
+        agent {
+            label 'workers'
+            }
+        steps{
         checkout scm
+        }
     }
 
     stage('Test'){
+    agent {
+            label 'workers'
+            }
+        steps{
         sh "echo 'running tests'"
+        }
     }
 
     stage('Build'){
+         agent {
+            label 'workers'
+            }
+        steps{
         sh """
             docker build -f Dockerfile.build -t buildfile .
             containerName=\$(docker run -d buildfile)
@@ -33,19 +46,25 @@ node('workers'){
             docker rm -f \$containerName
             zip -r deployment.zip buildfile
         """ 
+        }
     }
 
     stage('Push to ECR') {
+         agent {
+            label 'workers'
+            }
+        steps{
         sh """
             aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com 
             aws ecr describe-repositories --repository-names ${ecrreponame} --region ${region} || aws ecr create-repository --repository-name ${ecrreponame} --region ${region}
             docker tag ${dockerimagename} ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
             docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
-        """     
+        """  
+        }   
     }
-}
 
     stage('deploy on EC2') {
+        agent none
         sshagent(['3.110.162.54']){
             sh "aws configure set aws_access_key_id ${AcessKey}"
             sh "aws configure set aws_secret_access_key ${secretKey}"
@@ -91,5 +110,8 @@ node('workers'){
     //         """
     //     }
     // }
+    }
+
+    
 
 }
