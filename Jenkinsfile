@@ -58,6 +58,7 @@ node('workers'){
         // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
         // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
         // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
+            }
     }
     
     // post {
