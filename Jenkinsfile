@@ -14,6 +14,7 @@ def AcessKey = 'AKIA4Z5W7B6HQNT34PS5'
 def secretKey = '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'
 
 pipeline {
+    agent any
     stages{
         stage('Checkout'){
             agent {
@@ -65,7 +66,6 @@ pipeline {
         }
 
         stage('deploy on EC2') {
-            agent any
             steps{
                 sshagent(['3.110.162.54']){
                     sh 'ssh ec2-user@3.110.162.54 "aws configure set aws_access_key_id ${AcessKey}"'
