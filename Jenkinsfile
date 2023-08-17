@@ -40,9 +40,9 @@ node('workers'){
     }
 
     stage('deploy on EC2') {
-        sshagent(['jenkins-sshkey']) {
+        sshagent(['3.110.162.54']) {
         sh """
-            scp -i /var/lib/jenkins/.ssh/ec2-server ${localFilePath} ${Remoteuser}@${HostIp}:${remoteHostPath}"
+            scp -i /var/lib/jenkins/.ssh/ec2-server ${localFilePath} ${Remoteuser}@${HostIp}:${remoteHostPath}
             docker stop ${contname} || true && docker rm ${contname} || true
             aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com
             docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}
