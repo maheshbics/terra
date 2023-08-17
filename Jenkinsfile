@@ -71,6 +71,7 @@ pipeline {
                     sh "ssh ec2-user@3.110.162.54 'aws configure set aws_access_key_id ${AcessKey}'"
                     sh "ssh ec2-user@3.110.162.54 'aws configure set aws_secret_access_key ${secretKey}'"
                     sh "ssh ec2-user@3.110.162.54 'aws configure set default.region ${region}'"
+                    sh "ssh ec2-user@3.110.162.54 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
                     sh "ssh ec2-user@3.110.162.54 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
                     sh "ssh ec2-user@3.110.162.54 'docker stop ${contname} || true && docker rm ${contname} || true'"
                     sh "ssh ec2-user@3.110.162.54 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
@@ -79,7 +80,7 @@ pipeline {
     
         }
     
-    
+
     // post {
     //     always {
     //         script {
