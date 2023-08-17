@@ -2,7 +2,7 @@ def region = 'ap-south-1'
 def dockerimagename = 'buildfile'
 def awsaccountid ='880315142031'
 def ecrreponame = 'terra-react'
-def ec2sshKey = '/var/lib/jenkins/.ssh/id_rsa'
+def ec2sshKey = '/var/lib/jenkins/.ssh/ec2-server'
 def ecrRegion = 'ap-south-1'
 def ecrRepoUri = '880315142031.dkr.ecr.ap-south-1.amazonaws.com/terra-react'
 def contname = 'C7'
@@ -40,19 +40,15 @@ node('workers'){
     }
 
     stage('deploy on EC2') {
-        sshagent(['3.110.162.54']) {
+        sshagent(['3.110.162.54']){
         sh """
-            docker stop ${contname} || true && docker rm ${contname} || true
-            aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com
-            docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}
-            docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}
+            sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
+            sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
+            sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
+            sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
+        
         """
         }
-      
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
-        // sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
     
     }
     
