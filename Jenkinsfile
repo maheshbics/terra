@@ -10,6 +10,9 @@ def localFilePath = 'C:/Users/YOGA/Downloads/id_rsa'
 def Remoteuser = 'ec2-user'
 def ec2InstanceIp = '3.110.162.54'
 def remoteHostPath = '/var/lib/docker'
+def AcessKey = 'AKIA4Z5W7B6HQNT34PS5'
+def secretKey = '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'
+
 
 node('workers'){
     stage('Checkout'){
@@ -42,9 +45,9 @@ node('workers'){
     stage('deploy on EC2') {
         sshagent(['3.110.162.54']){
             sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
-            sh "aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}"
-            sh "aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}"
-            sh "aws configure set default.region ${AWS_DEFAULT_REGION}"
+            sh "aws configure set aws_access_key_id ${AcessKey}"
+            sh "aws configure set aws_secret_access_key ${secretKey}"
+            sh "aws configure set default.region ${region}"
             sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com'"
             sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}'"
             sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}'"
