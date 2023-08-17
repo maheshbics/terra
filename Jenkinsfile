@@ -8,7 +8,7 @@ def ecrRepoUri = '880315142031.dkr.ecr.ap-south-1.amazonaws.com/terra-react'
 def contname = 'C7'
 def localFilePath = 'C:/Users/YOGA/Downloads/terra.pem'
 def Remoteuser = 'ec2-user'
-def HostIp = '3.110.162.54'
+def ec2InstanceIp = '3.110.162.54'
 def remoteHostPath = '/var/lib/docker'
 
 node('workers'){
