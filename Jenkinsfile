@@ -44,7 +44,7 @@ node('workers'){
 
     stage('deploy on EC2') {
         sshagent(['3.110.162.54']){
-            sh "ssh -o StrictHostKeyChecking=no -i ${ec2sshKey} ec2-user@${ec2InstanceIp} 'docker stop ${contname} || true && docker ${contname} || true'"
+            sh "docker stop ${contname} || true && docker rm ${contname} || true"
             sh "aws configure set aws_access_key_id ${AcessKey}"
             sh "aws configure set aws_secret_access_key ${secretKey}"
             sh "aws configure set default.region ${region}"
