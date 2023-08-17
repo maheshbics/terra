@@ -66,7 +66,7 @@ pipeline {
         }
 
         stage('deploy on EC2') {
-            agent none
+            agent any
             steps{
                 sshagent(['3.110.162.54']){
                     sh "aws configure set aws_access_key_id ${AcessKey}"
