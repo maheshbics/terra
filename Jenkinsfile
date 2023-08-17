@@ -67,14 +67,16 @@ pipeline {
 
         stage('deploy on EC2') {
             agent none
-            sshagent(['3.110.162.54']){
-                sh "aws configure set aws_access_key_id ${AcessKey}"
-                sh "aws configure set aws_secret_access_key ${secretKey}"
-                sh "aws configure set default.region ${region}"
-                sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com"
-                sh "docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}"
-                sh "docker stop ${contname} || true && docker rm ${contname} || true"
-                sh "docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}"
+            steps{
+                sshagent(['3.110.162.54']){
+                    sh "aws configure set aws_access_key_id ${AcessKey}"
+                    sh "aws configure set aws_secret_access_key ${secretKey}"
+                    sh "aws configure set default.region ${region}"
+                    sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com"
+                    sh "docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}"
+                    sh "docker stop ${contname} || true && docker rm ${contname} || true"
+                    sh "docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}"
+                }
             }
     
         }
