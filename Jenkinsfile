@@ -17,65 +17,67 @@ pipeline {
     agent none
     stages{
         stage('Checkout'){
-        agent {
-            label 'workers'
+            agent {
+                label 'workers'
             }
-        steps{
-        checkout scm
-        }
-    }
-
-    stage('Test'){
-    agent {
-            label 'workers'
+            steps{
+                checkout scm
             }
-        steps{
-        sh "echo 'running tests'"
         }
-    }
 
-    stage('Build'){
-         agent {
-            label 'workers'
+        stage('Test'){
+            agent {
+                label 'workers'
             }
-        steps{
-        sh """
-            docker build -f Dockerfile.build -t buildfile .
-            containerName=\$(docker run -d buildfile)
-            docker cp \$containerName:/app/build buildfile
-            docker rm -f \$containerName
-            zip -r deployment.zip buildfile
-        """ 
-        }
-    }
-
-    stage('Push to ECR') {
-         agent {
-            label 'workers'
+       
+            steps{
+                sh "echo 'running tests'"
             }
-        steps{
-        sh """
-            aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com 
-            aws ecr describe-repositories --repository-names ${ecrreponame} --region ${region} || aws ecr create-repository --repository-name ${ecrreponame} --region ${region}
-            docker tag ${dockerimagename} ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
-            docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
-        """  
-        }   
-    }
-
-    stage('deploy on EC2') {
-        agent none
-        sshagent(['3.110.162.54']){
-            sh "aws configure set aws_access_key_id ${AcessKey}"
-            sh "aws configure set aws_secret_access_key ${secretKey}"
-            sh "aws configure set default.region ${region}"
-            sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com"
-            sh "docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}"
-            sh "docker stop ${contname} || true && docker rm ${contname} || true"
-            sh "docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}"
         }
+
+        stage('Build'){
+            agent {
+                label 'workers'
+            }
+            steps{
+                sh """
+                    docker build -f Dockerfile.build -t buildfile .
+                    containerName=\$(docker run -d buildfile)
+                    docker cp \$containerName:/app/build buildfile
+                    docker rm -f \$containerName
+                    zip -r deployment.zip buildfile
+            
+                """ 
+            }
+        }
+
+        stage('Push to ECR') {
+            agent {
+                label 'workers'
+            }
+            steps{
+                sh """
+                    aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com 
+                    aws ecr describe-repositories --repository-names ${ecrreponame} --region ${region} || aws ecr create-repository --repository-name ${ecrreponame} --region ${region}
+                    docker tag ${dockerimagename} ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
+                    docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
+                """  
+            }   
+        }
+
+        stage('deploy on EC2') {
+            agent none
+            sshagent(['3.110.162.54']){
+                sh "aws configure set aws_access_key_id ${AcessKey}"
+                sh "aws configure set aws_secret_access_key ${secretKey}"
+                sh "aws configure set default.region ${region}"
+                sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com"
+                sh "docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}"
+                sh "docker stop ${contname} || true && docker rm ${contname} || true"
+                sh "docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}"
+            }
     
-    }
+        }
     
     // post {
     //     always {
