@@ -13,6 +13,8 @@ def remoteHostPath = '/var/lib/docker'
 def AcessKey = 'AKIA4Z5W7B6HQNT34PS5'
 def secretKey = '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'
 
+pipeline {
+    agent none
 
 node('workers'){
     stage('Checkout'){
@@ -41,15 +43,16 @@ node('workers'){
             docker push ${awsaccountid}.dkr.ecr.${region}.amazonaws.com/${ecrreponame}:${env.BUILD_NUMBER}
         """     
     }
+}
 
     stage('deploy on EC2') {
         sshagent(['3.110.162.54']){
-            sh "docker stop ${contname} || true && docker rm ${contname} || true"
             sh "aws configure set aws_access_key_id ${AcessKey}"
             sh "aws configure set aws_secret_access_key ${secretKey}"
             sh "aws configure set default.region ${region}"
             sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com"
             sh "docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}"
+            sh "docker stop ${contname} || true && docker rm ${contname} || true"
             sh "docker run -itd --name ${contname} -p 3000:3000 ${ecrRepoUri}:${env.BUILD_NUMBER}"
         }
     
@@ -88,4 +91,5 @@ node('workers'){
     //         """
     //     }
     // }
+
 }
