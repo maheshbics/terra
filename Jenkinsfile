@@ -6,6 +6,10 @@ def ec2sshKey = '/var/lib/jenkins/.ssh/id_rsa'
 def ecrRegion = 'ap-south-1'
 def ecrRepoUri = '880315142031.dkr.ecr.ap-south-1.amazonaws.com/terra-react'
 def contname = 'C7'
+def localFilePath = 'C:/Users/YOGA/Downloads/terra.pem'
+def Remoteuser = 'ec2-user'
+def HostIp = '3.110.162.54'
+def remoteHostPath = '/var/lib/docker'
 
 node('workers'){
     stage('Checkout'){
@@ -38,6 +42,7 @@ node('workers'){
     stage('deploy on EC2') {
         sshagent(['jenkins-sshkey']) {
         sh """
+            scp -i /var/lib/jenkins/.ssh/ec2-server ${localFilePath} ${Remoteuser}@${HostIp}:${remoteHostPath}"
             docker stop ${contname} || true && docker rm ${contname} || true
             aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsaccountid}.dkr.ecr.${region}.amazonaws.com
             docker pull ${ecrRepoUri}:${env.BUILD_NUMBER}
