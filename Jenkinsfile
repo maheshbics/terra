@@ -51,7 +51,6 @@ pipeline {
             }
         }
         
-
         stage('Push to ECR') {
             agent {
                 label 'workers'
